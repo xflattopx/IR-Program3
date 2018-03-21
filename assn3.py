@@ -51,6 +51,18 @@ def giveWordList(filename):
             words.extend(token.replace('--', '-').split('-'))
     return words
 '''
-    
-def getArticleInformation(text):
+#parseCorpus(corpus) creates a list of document objects from
+#the corpus.  for example, if there's 10 documents, parseCorpus
+#breaks the documents up into individual documents
+#corpus is file in which contains all the documents.
+def parseCorpus(corpus):
     re_entry = re.compile("^(\.I )\d+")
+    singularArticle = re.split(re_entry, corpus)
+
+    
+#################    MAIN    ####################
+
+f = open("./corpus/cran.all.1400", "r")
+
+
+
