@@ -6,6 +6,17 @@ class Document:
         author    = ''
         title     = ''
         body_text = ''
+        number = -1
+
+    # Creates document object
+    @staticmethod
+    def buildDocument(initAuth, initTitle, initBody, num):
+        d = Document()
+        d.author    = initAuth
+        d.title     = initTitle
+        d.body_text = initBody
+        d.number    = num
+        return d
 
 # Build the inverted index
 
@@ -37,8 +48,28 @@ def tokenize(word):
 
 # extract the raw text from a file
 #
-def get_raw_text(filename):
- 
+def getRawText(filename):
+    f = open(filename, 'r')
+    fileText = f.read()
+    return fileText
+
+
+def parseCorpus(corpus):
+    docList = []
+    dracula = -1
+    docs = []
+    print('i\'m alive!')
+    #corpus split on entries
+    re_entry = re.compile("\.I ")
+    docs = re.split(re_entry, corpus)
+
+    #print(docs[1])
+    #print(len(docs))
+
+    for entry in docs:
+        docList.append(getArticleInformation(entry))
+
+
 '''   
 #giveWordList(filename) converts a file called filename
 #to a list of words breaking the string the same way
@@ -51,18 +82,14 @@ def giveWordList(filename):
             words.extend(token.replace('--', '-').split('-'))
     return words
 '''
-#parseCorpus(corpus) creates a list of document objects from
-#the corpus.  for example, if there's 10 documents, parseCorpus
-#breaks the documents up into individual documents
-#corpus is file in which contains all the documents.
-def parseCorpus(corpus):
-    re_entry = re.compile("^(\.I )\d+")
-    singularArticle = re.split(re_entry, corpus)
-
     
-#################    MAIN    ####################
+def getArticleInformation(unprocessedDocs):
+    #print(type(unprocessedDocs))
+    doc_buster = re.compile("\.[A-Z]")
+    doc_attributes = re.split(doc_buster, unprocessedDocs)
+    for x in doc_attributes:
+        print (x)
 
-f = open("./corpus/cran.all.1400", "r")
-
-
-
+''' MAIN '''
+theFile = getRawText('cran.all.1400')
+parseCorpus(theFile)
