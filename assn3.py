@@ -58,7 +58,6 @@ def parseCorpus(corpus):
     docList = []
     dracula = -1
     docs = []
-    print('i\'m alive!')
     #corpus split on entries
     re_entry = re.compile("\.I ")
     docs = re.split(re_entry, corpus)
@@ -66,8 +65,16 @@ def parseCorpus(corpus):
     #print(docs[1])
     #print(len(docs))
 
+    # for some reason the first entry is originally blank.
+    # this fucks everything up so we have to make it die.
+    del(docs[0])
+    #getArticleInformation(docs[0])
+
     for entry in docs:
         docList.append(getArticleInformation(entry))
+
+    print("returning doclist")
+    return docList
 
 
 '''   
@@ -85,11 +92,22 @@ def giveWordList(filename):
     
 def getArticleInformation(unprocessedDocs):
     #print(type(unprocessedDocs))
-    doc_buster = re.compile("\.[A-Z]")
+    doc_buster = re.compile("\.[A-Z]\n")
     doc_attributes = re.split(doc_buster, unprocessedDocs)
-    for x in doc_attributes:
-        print (x)
+
+    # build a document using the relevant information and return it
+    return Document.buildDocument(doc_attributes[2],doc_attributes[1],doc_attributes[4],doc_attributes[0])
+
 
 ''' MAIN '''
 theFile = getRawText('cran.all.1400')
-parseCorpus(theFile)
+theImportantDoclist = parseCorpus(theFile)
+
+doc1 = theImportantDoclist[0]
+print(doc1.author)
+print(doc1.title)
+print(doc1.body_text)
+print(doc1.number)
+
+print("testing body text")
+print(doc1.body_text[1])
