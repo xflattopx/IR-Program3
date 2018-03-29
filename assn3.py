@@ -18,6 +18,51 @@ class Document:
         d.number    = num
         return d
 
+#END CLASS
+
+class Index:
+	def __init__(self):
+		tier1 = {}
+		tier2 = {}
+		numDouments = -1
+	@staticmethod
+	def creatIndex():
+		index = Index()
+		index.uments = 0
+		return Index
+	
+	#adds all terms in list of documents docList to the index self
+	def populateIndex(self, docList):
+		for doc in docList:
+			self.updateIndex(self.tier1, doc.title)
+			self.updateIndex(self.tier2, doc.body_text)
+			self.numDocments += 1
+			
+	#adds all terms in string content to tier tier of index self
+	def updateIndex(self, tier, content):
+		termList = content.split()
+		for word in termList:
+			token = tokenize(word)
+			if token in tier:
+				
+				
+		
+#END CLASS
+
+class TermList:
+	def __init__(self):
+		termStr = ''
+		documentFrequency = -1
+		docList = [] #list of tuples of the form (docID, term frequency)
+		
+	@staticmethod
+	def buildTerm(t):
+		term = TermList()
+		term.termStr = t
+		documentFrequency = 1
+        
+#END CLASS
+
 # Build the inverted index
 
 #toknizeWordList(line) tokenizes a string of words. 
@@ -43,7 +88,7 @@ def tokenize(word):
     regex = re.compile('[^a-zA-Z]+')
     w = regex.sub('', word)
     w = w.lower()
-    w = porter.stem(w)
+    #w = porter.stem(w)
     return w
 
 # extract the raw text from a file
