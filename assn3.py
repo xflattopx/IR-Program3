@@ -3,10 +3,10 @@ import re
 # Build an object class
 class Document:
     def __init__(self):
-        author    = ''
-        title     = ''
-        body_text = ''
-        number = -1
+        self.author    = ''
+        self.title     = ''
+        self.body_text = ''
+        self.number = -1
 
     # Creates document object
     @staticmethod
@@ -21,47 +21,83 @@ class Document:
 #END CLASS
 
 class Index:
-	def __init__(self):
-		tier1 = {}
-		tier2 = {}
-		numDouments = -1
-	@staticmethod
-	def creatIndex():
-		index = Index()
-		index.uments = 0
-		return Index
+    def __init__(self):
+        self.tier1 = {}
+        self.tier2 = {}
+        self.numDouments = -1
+        
+    def __str__(self):
+        return 'Index'
+    
+    @staticmethod
+    def createIndex():
+        index = Index()
+        index.numDocuments = 0
+        return index
 	
-	#adds all terms in list of documents docList to the index self
-	def populateIndex(self, docList):
-		for doc in docList:
-			self.updateIndex(self.tier1, doc.title)
-			self.updateIndex(self.tier2, doc.body_text)
-			self.numDocments += 1
+    #adds all terms in list of documents docList to the index self
+    def populateIndex(self, docList):
+        for doc in docList:
+            print(self.numDocuments)
+            self.updateIndex(self.tier1, doc.title, doc.number)
+            self.updateIndex(self.tier2, doc.body_text, doc.number)
+            self.numDocments += 1
 			
-	#adds all terms in string content to tier tier of index self
-	def updateIndex(self, tier, content):
-		termList = content.split()
-		for word in termList:
-			token = tokenize(word)
-			if token in tier:
-				
+    #adds all terms in string content to tier tier of index self
+    def updateIndex(self, tier, content, docID):
+        wordList = content.split()
+        for word in wordList:
+            token = tokenize(word)
+            print('curToken: ' + token)
+            if token in tier:
+                termList = tier[token][0]
+                #print('type termList: ' + type(termList))
+                lastDocTuple = termList.getLast()
+                if(lastDocTup[0] == docID):
+                    termList.incLastTF()
+                else:
+                    termList.addDoc(docID)
+            else:
+                print('token added: ' + token)
+                #print('in else type termList: ' + str(type(tier[token])))
+                tier[token] = TermList.buildTermList(token, docID)
+                
 				
 		
 #END CLASS
 
 class TermList:
-	def __init__(self):
-		termStr = ''
-		documentFrequency = -1
-		docList = [] #list of tuples of the form (docID, term frequency)
-		
-	@staticmethod
-	def buildTerm(t):
-		term = TermList()
-		term.termStr = t
-		documentFrequency = 1
+    def __init__(self):
+        self.termStr = ''
+        self.documentFrequency = -1
+        self.docList = [] #list of tuples of the form (docID, term frequency)
+	
+    def __str__(self):
+        return 'TermList'
+    
+    def __repr__(self):
+        return 'TermList'
         
-#END CLASS
+    @staticmethod
+    def buildTermList(t, docID):
+        term = TermList()
+        term.termStr = t
+        term.documentFrequency = 1
+        term.docList.append((docID, 1))
+        
+    def getLast(self):
+        return self.docList[len(self.docList) - 1]
+    
+    def incLastTF(self):
+        last = self.getLast()
+        self.docList[len(self.docList) - 1] = (last[0], last[1] + 1)
+        
+    def addDoc(self, docID):
+        self.docList.append((docID, 1))
+        
+    def incDocFreq(self):
+        self.documentFrequency += 1
+	
 
 # Build the inverted index
 
@@ -118,7 +154,7 @@ def parseCorpus(corpus):
     for entry in docs:
         docList.append(getArticleInformation(entry))
 
-    print("returning doclist")
+    #print("returning doclist")
     return docList
 
 
@@ -145,14 +181,20 @@ def getArticleInformation(unprocessedDocs):
 
 
 ''' MAIN '''
-theFile = getRawText('cran.all.1400')
-theImportantDoclist = parseCorpus(theFile)
+theFile = getRawText('corpus/cran.all.1400')
+docList = parseCorpus(theFile)
 
-doc1 = theImportantDoclist[0]
+'''
+doc1 = doclist[0]
 print(doc1.author)
 print(doc1.title)
 print(doc1.body_text)
 print(doc1.number)
+'''
 
-print("testing body text")
-print(doc1.body_text[1])
+
+index = Index.createIndex()
+dls = docList[0:2]
+index.populateIndex(dls)
+
+print(index.tier1['the'].docList)
