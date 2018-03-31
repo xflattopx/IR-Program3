@@ -24,7 +24,7 @@ class Index:
     def __init__(self):
         self.tier1 = {}
         self.tier2 = {}
-        self.numDouments = -1
+        self.numDocuments = -1
         
     def __str__(self):
         return 'Index'
@@ -38,31 +38,39 @@ class Index:
     #adds all terms in list of documents docList to the index self
     def populateIndex(self, docList):
         for doc in docList:
-            print(self.numDocuments)
+            #print('indexing doc number ' + str(doc.number))
             self.updateIndex(self.tier1, doc.title, doc.number)
             self.updateIndex(self.tier2, doc.body_text, doc.number)
-            self.numDocments += 1
+            self.numDocuments += 1
 			
     #adds all terms in string content to tier tier of index self
     def updateIndex(self, tier, content, docID):
         wordList = content.split()
         for word in wordList:
             token = tokenize(word)
-            print('curToken: ' + token)
+            
             if token in tier:
-                termList = tier[token][0]
-                #print('type termList: ' + type(termList))
-                lastDocTuple = termList.getLast()
-                if(lastDocTup[0] == docID):
-                    termList.incLastTF()
-                else:
-                    termList.addDoc(docID)
-            else:
-                print('token added: ' + token)
-                #print('in else type termList: ' + str(type(tier[token])))
-                tier[token] = TermList.buildTermList(token, docID)
+                wasInTier = False
+                for t in tier[token]:
+                    if(t.termStr == token):
+                        wasInTier = True
+                        termList = t
+                        lastDocTuple = t.getLast()
                 
-				
+                        if(lastDocTuple[0] == docID):
+                            termList.incLastTF()
+                        else:
+                            termList.addDoc(docID)
+                            termList.incDocFreq()
+                if(wasInTier == False):
+                    t.append = TermList.buildTermList(token, docID)
+                    
+            else:
+                tier[token] = []
+                tier[token].append(TermList.buildTermList(token, docID))
+                
+    def computeSimilarity(query):
+        
 		
 #END CLASS
 
@@ -84,6 +92,7 @@ class TermList:
         term.termStr = t
         term.documentFrequency = 1
         term.docList.append((docID, 1))
+        return term
         
     def getLast(self):
         return self.docList[len(self.docList) - 1]
@@ -94,6 +103,7 @@ class TermList:
         
     def addDoc(self, docID):
         self.docList.append((docID, 1))
+        
         
     def incDocFreq(self):
         self.documentFrequency += 1
@@ -137,7 +147,6 @@ def getRawText(filename):
 
 def parseCorpus(corpus):
     docList = []
-    dracula = -1
     docs = []
     #corpus split on entries
     re_entry = re.compile("\.I ")
@@ -154,22 +163,10 @@ def parseCorpus(corpus):
     for entry in docs:
         docList.append(getArticleInformation(entry))
 
-    #print("returning doclist")
     return docList
 
 
-'''   
-#giveWordList(filename) converts a file called filename
-#to a list of words breaking the string the same way
-#as tokenizeWordList. returns a list of words.
-def giveWordList(filename):
-    f = open(filename, 'r')
-    words = []
-    for line in f:
-        for token in line.split():
-            words.extend(token.replace('--', '-').split('-'))
-    return words
-'''
+
     
 def getArticleInformation(unprocessedDocs):
     #print(type(unprocessedDocs))
@@ -177,24 +174,28 @@ def getArticleInformation(unprocessedDocs):
     doc_attributes = re.split(doc_buster, unprocessedDocs)
 
     # build a document using the relevant information and return it
-    return Document.buildDocument(doc_attributes[2],doc_attributes[1],doc_attributes[4],doc_attributes[0])
+    return Document.buildDocument(doc_attributes[2],doc_attributes[1],doc_attributes[4],int(doc_attributes[0]))
 
+#######################################
+#                MAIN                 #
+#######################################
 
-''' MAIN '''
 theFile = getRawText('corpus/cran.all.1400')
 docList = parseCorpus(theFile)
 
-'''
-doc1 = doclist[0]
-print(doc1.author)
-print(doc1.title)
-print(doc1.body_text)
-print(doc1.number)
-'''
+for doc in docList[0:5]:
+    doc1 = doc
+    #print(doc1.author)
+    print(doc1.title)
+    #print(doc1.body_text)
+    print(str(doc1.number) + '\n')
+
 
 
 index = Index.createIndex()
-dls = docList[0:2]
+dls = docList[0:5]
 index.populateIndex(dls)
-
-print(index.tier1['the'].docList)
+print('documents in index: ' + str(index.numDocuments))
+print(index.tier1['of'])
+print(index.tier1['of'][0].documentFrequency)
+print(index.tier1['of'][0].docList)
