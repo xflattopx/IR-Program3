@@ -1,4 +1,5 @@
 import re
+import math
 
 # Build an object class
 class Document:
@@ -38,7 +39,6 @@ class Index:
     #adds all terms in list of documents docList to the index self
     def populateIndex(self, docList):
         for doc in docList:
-            #print('indexing doc number ' + str(doc.number))
             self.updateIndex(self.tier1, doc.title, doc.number)
             self.updateIndex(self.tier2, doc.body_text, doc.number)
             self.numDocuments += 1
@@ -63,32 +63,49 @@ class Index:
                             termList.addDoc(docID)
                             termList.incDocFreq()
                 if(wasInTier == False):
-                    t.append = TermList.buildTermList(token, docID)
+                    t.append = Term.buildTerm(token, docID)
                     
             else:
                 tier[token] = []
-                tier[token].append(TermList.buildTermList(token, docID))
+                tier[token].append(Term.buildTerm(token, docID))
                 
-    def computeSimilarity(query):
+    def tfxidf(self, term, docnum, tier):
+        tf  = -1
+        df  = -1
+        idf = -1
+        termObject = None
         
-		
+        for t in tier[term]:
+            if(t.termStr == term):
+                termObject = t
+                for tup in t.docList:
+                    if tup[0] == docnum:
+                        tf = tup[1]
+                        break
+        
+        df = termObject.documentFrequency
+        idf = math.log(self.numDocuments / df)
+
+        return math.log(tf) * idf
+                
+    #def computeSimilarity(query):
 #END CLASS
 
-class TermList:
+class Term:
     def __init__(self):
         self.termStr = ''
         self.documentFrequency = -1
         self.docList = [] #list of tuples of the form (docID, term frequency)
 	
     def __str__(self):
-        return 'TermList'
+        return 'Term'
     
     def __repr__(self):
-        return 'TermList'
+        return 'Term'
         
     @staticmethod
-    def buildTermList(t, docID):
-        term = TermList()
+    def buildTerm(t, docID):
+        term = Term()
         term.termStr = t
         term.documentFrequency = 1
         term.docList.append((docID, 1))
@@ -199,3 +216,5 @@ print('documents in index: ' + str(index.numDocuments))
 print(index.tier1['of'])
 print(index.tier1['of'][0].documentFrequency)
 print(index.tier1['of'][0].docList)
+
+print(index.tfxidf('of', 1, index.tier2))
