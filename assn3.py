@@ -74,21 +74,37 @@ class Index:
         df  = -1
         idf = -1
         termObject = None
-        
-        for t in tier[term]:
-            if(t.termStr == term):
-                termObject = t
-                for tup in t.docList:
-                    if tup[0] == docnum:
-                        tf = tup[1]
-                        break
+
+        if term in tier:
+            for t in tier[term]:
+                if(t.termStr == term):
+                    termObject = t
+                    for tup in t.docList:
+                        if tup[0] == docnum:
+                            tf = tup[1]
+                            break
+                    return 0
+        else: return 0
         
         df = termObject.documentFrequency
         idf = math.log(self.numDocuments / df)
+        
+        print(tf)
 
         return math.log(tf) * idf
-                
-    #def computeSimilarity(query):
+    
+    # computeSimilarity computes the semelarity between list of terms
+    # query and document number docnum in tier tier of the Index.            
+    def computeSimilarity(self, query, docnum, tier):
+        query_vector = []
+        doc_vector   = []
+        
+        for term in query:
+            query_vector.append(1)
+            doc_vector.append(self.tfxidf(term, docnum, tier))
+        
+        return dotProduct(query_vector, doc_vector)
+        
 #END CLASS
 
 class Term:
@@ -182,8 +198,11 @@ def parseCorpus(corpus):
 
     return docList
 
-
-
+def dotProduct(a, b):
+    total = 0
+    for i in range(0, len(a)):
+        total += (a[i] * b[i])
+    return total
     
 def getArticleInformation(unprocessedDocs):
     #print(type(unprocessedDocs))
@@ -202,9 +221,7 @@ docList = parseCorpus(theFile)
 
 for doc in docList[0:5]:
     doc1 = doc
-    #print(doc1.author)
     print(doc1.title)
-    #print(doc1.body_text)
     print(str(doc1.number) + '\n')
 
 
@@ -218,3 +235,6 @@ print(index.tier1['of'][0].documentFrequency)
 print(index.tier1['of'][0].docList)
 
 print(index.tfxidf('of', 1, index.tier2))
+
+q = 'what similarity laws must be obeyed when constructing aeroelastic models of heated high speed aircraft'.split()
+print(index.computeSimilarity(q, 184, index.tier2))
