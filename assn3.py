@@ -74,17 +74,23 @@ class Index:
         df  = -1
         idf = -1
         termObject = None
+       
 
         if term in tier:
             for t in tier[term]:
                 if(t.termStr == term):
                     termObject = t
+                    inDoc = False
                     for tup in t.docList:
                         if tup[0] == docnum:
                             tf = tup[1]
+                            inDoc = True
+                            print("the term is " + t.termStr +  " tf is " + str(tf))
                             break
-                    return 0
-        else: return 0
+                    if(not inDoc):    
+                        return 0
+        else: 
+             return 0
         
         df = termObject.documentFrequency
         idf = math.log(self.numDocuments / df)
@@ -102,8 +108,8 @@ class Index:
         for term in query:
             query_vector.append(1)
             doc_vector.append(self.tfxidf(term, docnum, tier))
-        
-        return dotProduct(query_vector, doc_vector)
+            print(term + " tfxidf is " + str(self.tfxidf(term, docnum, tier)))
+        return dotProduct(query_vector, doc_vector)/(2* len(query_vector))
         
 #END CLASS
 
@@ -218,16 +224,16 @@ def getArticleInformation(unprocessedDocs):
 
 theFile = getRawText('corpus/cran.all.1400')
 docList = parseCorpus(theFile)
-
-for doc in docList[0:5]:
+'''
+for doc in docList:
     doc1 = doc
     print(doc1.title)
     print(str(doc1.number) + '\n')
-
+'''
 
 
 index = Index.createIndex()
-dls = docList[0:5]
+dls = docList
 index.populateIndex(dls)
 print('documents in index: ' + str(index.numDocuments))
 print(index.tier1['of'])
